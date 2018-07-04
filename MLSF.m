@@ -58,17 +58,26 @@ for j = 1:K
     meta_Pre_Labels = zeros(num_test,meta_size);
     meta_Outputs = zeros(num_test,meta_size);
     if meta_size == 1
+        disp('1 meta_size:');
+        disp(size(meta_train_data));
         model = svmtrain(meta_train_target(:,1),meta_train_data,'-t 0 -b 1 -q');
         meta_Pre_Labels(:,1) = svmpredict(null_target,meta_test_data,model,'-b 1 -q');
     else
         chain = randperm(meta_size); 
-        for k = chain             
+        for k = chain  
             model = svmtrain(meta_train_target(:,k),meta_train_data,'-t 0 -b 1 -q');
-            [predicted_label,accuracy,prob_estimates] = svmpredict(null_target,meta_test_data,model,'-b 1 -q');
-            pos_index = find(model.Label==1);
-            Prob_pos = prob_estimates(:,pos_index);
-            meta_Outputs(:,k) = Prob_pos;
-            meta_Pre_Labels(:,k) = predicted_label;
+            if sum(meta_train_target(:,k))==0
+                Prob_pos = null_target;
+                meta_Outputs(:,k) = Prob_pos;
+                meta_Pre_Labels(:,k) = null_target;
+            else
+                [predicted_label,accuracy,prob_estimates] = svmpredict(null_target,meta_test_data,model,'-b 1 -q');
+                pos_index = find(model.Label==1);
+                Prob_pos = prob_estimates(:,pos_index);
+                meta_Outputs(:,k) = Prob_pos;
+                meta_Pre_Labels(:,k) = predicted_label;
+            end
+            %meta_Outputs(:,k) = Prob_pos;
             %meta_Pre_Labels(:,k) = svmpredict(null_target,meta_test_data,model,'-b 1 -q');           
             meta_train_data = [meta_train_data meta_train_target(:,k)];
             meta_test_data = [meta_test_data meta_Pre_Labels(:,k)];      

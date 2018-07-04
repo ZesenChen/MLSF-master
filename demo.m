@@ -17,7 +17,7 @@ addpath('data','eval');
 addpath(genpath('func'));
 
 %% Choose a dataset
-dataset  =   'yeast';
+dataset  =   'slashdot';
 load([dataset,'.mat']);
 
 %% Set parameters 
@@ -39,6 +39,7 @@ indices = crossvalind('Kfold',size(data,1),num_fold);
 for i = 1:num_fold
     disp(['Fold ',num2str(i)]);
     test = (indices == i); train = ~test; 
+    disp(size(train));
     [Outputs,Pre_Labels] = MLSF(data(train,:),target(:,train),data(test,:),opts);
     hm=[hm,Hamming_loss(Pre_Labels,target(:,test))];
     rl=[rl,Ranking_loss(Outputs,target(:,test))];
